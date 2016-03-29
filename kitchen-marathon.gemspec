@@ -13,6 +13,12 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'http://github.com/yieldbot/kitchen-marathon'
   spec.license       = 'Apache 2.0'
 
+  if spec.respond_to?(:metadata)
+    spec.metadata['allowed_push_host'] = 'https://artifactory.yb0t.cc/artifactory/api/gems/yieldbot-gems'
+  else
+    raise "RubyGems 2.0 or newer is required to protect against public gem pushes."
+  end
+
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.executables   = []
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})

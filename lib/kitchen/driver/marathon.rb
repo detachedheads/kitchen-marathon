@@ -21,8 +21,6 @@ require 'kitchen'
 require 'marathon'
 require 'retryable'
 
-#require_relative ""
-
 module Kitchen
 
   module Driver
@@ -32,7 +30,7 @@ module Kitchen
     # @author Anthony Spring <tony@porkchopsandpaintchips.com>
     class Marathon < Kitchen::Driver::SSHBase
 
-      default_config :app_prefix, 'kitchen-'
+      default_config :app_prefix, 'kitchen'
       default_config :app_template
       expand_path_for :app_template
 
@@ -49,6 +47,8 @@ module Kitchen
       default_config :http_proxyport
       default_config :http_proxyuser
       default_config :http_proxypass
+
+      # 
 
       # Creates a new Driver object using the provided configuration data
       # which will be merged with any default configuration.
@@ -86,20 +86,38 @@ module Kitchen
       protected
 
       def create_app(config)
-        begin
-          # Attempt to get the app from the server
-          app = ::Marathon::App.get(config['id'])
-          puts app.change!(config, true)
-        rescue ::Marathon::Error::NotFoundError => e
-          # If the app isnt found, this is a new app so create the app
-          puts ::Marathon::App.create(config)
+
+        # Create the application
+        Retryable.retryable(
+          :tries => 10,
+          :sleep => lambda { |n| [2**n, 30].min },
+          :on => [::Marathon::Error::TimeoutError]
+        ) do |r, _|
+
+          info("Creating the application: #{config['id']}")
+
+          app = ::Marathon::App.create(config)
+        end
+
+        # Wait for the deployment to finish
+        Retryable.retryable(
+          :tries => 10,
+          :sleep => lambda { |n| [2**n, 30].min },
+          :on => [::Marathon::Error::TimeoutError, ::Timeout::Error]
+        ) do |r, _|
+
+          info("Waiting for application to deploy: #{config['id']}")
+
+          raise ::Timeout::Error.new() if ::Marathon::App.get(config['id']).info[:tasksRunning] == 0
+
+          info("Application #{config['id']} is running.")
         end
 
         config['id']
       end
 
       def create_app_id
-        "#{config[:app_prefix]}#{SecureRandom.hex}"
+        "#{config[:app_prefix]}/#{File.basename(config[:kitchen_root])}-#{SecureRandom.hex}"
       end
 
       def generate_app_config

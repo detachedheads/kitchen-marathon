@@ -56,9 +56,9 @@ Created and maintained by [Anthony Spring][author] (<aspring@yieldbot.com>)
 Apache 2.0 (see [LICENSE][license])
 
 
-[author]:           https://github.com/enter-github-user
-[issues]:           https://github.com/enter-github-user/kitchen-marathon/issues
-[license]:          https://github.com/enter-github-user/kitchen-marathon/blob/master/LICENSE
-[repo]:             https://github.com/enter-github-user/kitchen-marathon
+[author]:           https://github.com/yieldbot
+[issues]:           https://github.com/yieldbot/kitchen-marathon/issues
+[license]:          https://github.com/yieldbot/kitchen-marathon/blob/master/LICENSE
+[repo]:             https://github.com/yieldbot/kitchen-marathon
 [driver_usage]:     http://docs.kitchen-ci.org/drivers/usage
 [chef_omnibus_dl]:  http://www.chef.io/chef/install/

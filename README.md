@@ -49,7 +49,7 @@ example:
 
 ## <a name="authors"></a> Authors
 
-Created and maintained by [Anthony Spring][author] (<tony@porkchopsandpaintchips.com>)
+Created and maintained by [Anthony Spring][author] (<aspring@yieldbot.com>)
 
 ## <a name="license"></a> License
 

@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 #
-# Author:: Anthony Spring (<tony@porkchopsandpaintchips.com>)
+# Author:: Anthony Spring (<aspring@yieldbot.com>)
 #
 # Copyright (C) 2016, Anthony Spring
 #
@@ -28,18 +28,16 @@ module Kitchen
 
     # Marathon driver for Kitchen.
     #
-    # @author Anthony Spring <tony@porkchopsandpaintchips.com>
+    # @author Anthony Spring <aspring@yieldbot.com>
     class Marathon < Kitchen::Driver::SSHBase
-
-      #kitchen_driver_api_version 2
-
-      #plugin_version Kitchen::Driver::MARATHON_VERSION
 
       default_config  :app_prefix, 'kitchen'
       default_config  :app_template
       expand_path_for :app_template
 
-      default_config :wait_for_sshd, true
+      # Expose some basic app configuration to easy configuration
+      default_config  :app_mem
+      default_config  :app_cpu
 
       # Marathon HTTP Configuration
 
@@ -57,8 +55,8 @@ module Kitchen
 
       # SSH Configuration
 
-      default_config :ssh_username,     'kitchen'
-      default_config :ssh_private_key,  File.join(Dir.pwd, '.kitchen', 'kitchen.pem')
+      default_config  :ssh_username,     'kitchen'
+      default_config  :ssh_private_key,  File.join(Dir.pwd, '.kitchen', 'kitchen.pem')
       expand_path_for :ssh_private_key
 
       # Creates a new Driver object using the provided configuration data
@@ -88,9 +86,6 @@ module Kitchen
 
         # Update state
         update_app_state(state)
-
-        # Wait for SSHD to be available
-        #wait_for_sshd(state[:hostname], nil, :port => state[:port]) if config[:wait_for_sshd]
       end
 
       def converge(state) # rubocop:disable Metrics/AbcSize

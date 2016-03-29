@@ -5,9 +5,9 @@ require 'kitchen/driver/marathon_version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'kitchen-marathon'
-  spec.version       = Kitchen::Driver::MARATHON_VERSION
+  spec.version       = Kitchen::Driver::Version::STRING.dup
   spec.authors       = ['Anthony Spring']
-  spec.email         = ['tony@porkchopsandpaintchips.com']
+  spec.email         = ['aspring@yieldbot.com']
   spec.description   = %q{A Test Kitchen Driver for Marathon}
   spec.summary       = spec.description
   spec.homepage      = 'http://github.com/yieldbot/kitchen-marathon'
@@ -25,4 +25,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'rubocop'
 end

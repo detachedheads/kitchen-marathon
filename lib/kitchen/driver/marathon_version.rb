@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 #
-# Author:: Anthony Spring (<tony@porkchopsandpaintchips.com>)
+# Author:: Anthony Spring (<aspring@yieldbot.com>)
 #
 # Copyright (C) 2016, Anthony Spring
 #
@@ -16,11 +16,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'json'
+
 module Kitchen
-
   module Driver
+    # This defines the version of the gem
+    module Version
+      MAJOR = 0
+      MINOR = 0
+      PATCH = 1
+      BUILD = ''
 
-    # Version string for Marathon Kitchen driver
-    MARATHON_VERSION = "0.1.0.dev"
+      STRING = [MAJOR, MINOR, PATCH, BUILD].compact.join('.').chomp('.')
+
+      module_function
+
+      def json_version
+        {
+          'version' => STRING
+        }.to_json
+      end
+    end
   end
 end

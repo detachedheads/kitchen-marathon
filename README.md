@@ -1,22 +1,24 @@
-# <a name="title"></a> Kitchen::Marathon
+# Kitchen::Marathon
 
-A Test Kitchen Driver for Marathon.
+A Test Kitchen Driver for Mesos Marathon.
 
-## <a name="requirements"></a> Requirements
+This driver uses the [Marathon REST API][marathon_api] to create and destroy Marathon applications, allowing you to leverage your Mesos infrastructure for infrastructure testing!
+
+## Requirements
 
 **TODO:** document any software or library prerequisites that are required to
 use this driver. Implement the `#verify_dependencies` method in your Driver
 class to enforce these requirements in code, if possible.
 
-## <a name="installation"></a> Installation and Setup
+## Installation and Setup
 
 Please read the [Driver usage][driver_usage] page for more details.
 
-## <a name="config"></a> Configuration
+## Configuration
 
 **TODO:** Write descriptions of all configuration options
 
-### <a name="config-require-chef-omnibus"></a> require\_chef\_omnibus
+### require\_chef\_omnibus
 
 Determines whether or not a Chef [Omnibus package][chef_omnibus_dl] will be
 installed. There are several different behaviors available:
@@ -32,7 +34,7 @@ installed. There are several different behaviors available:
 
 The default value is unset, or `nil`.
 
-## <a name="development"></a> Development
+## Development
 
 * Source hosted at [GitHub][repo]
 * Report issues/questions/feature requests on [GitHub Issues][issues]
@@ -47,18 +49,19 @@ example:
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
-## <a name="authors"></a> Authors
+## Authors
 
 Created and maintained by [Anthony Spring][author] (<aspring@yieldbot.com>)
 
-## <a name="license"></a> License
+## License
 
 Apache 2.0 (see [LICENSE][license])
 
-
 [author]:           https://github.com/yieldbot
+[driver_usage]:     https://github.com/yieldbot/kitchen-marathon
 [issues]:           https://github.com/yieldbot/kitchen-marathon/issues
 [license]:          https://github.com/yieldbot/kitchen-marathon/blob/master/LICENSE
+[marathon]:         https://mesosphere.github.io/marathon/
+[marathon_api]:     https://github.com/otto-de/marathon-api
 [repo]:             https://github.com/yieldbot/kitchen-marathon
-[driver_usage]:     http://docs.kitchen-ci.org/drivers/usage
-[chef_omnibus_dl]:  http://www.chef.io/chef/install/
+

@@ -52,6 +52,10 @@ module Kitchen
       default_config  :ssh_private_key,  File.join(Dir.pwd, '.kitchen', 'kitchen.pem')
       expand_path_for :ssh_private_key
 
+      default_config(:instance_name) do |driver|
+        driver.windows_os? ? nil : driver.instance.name
+      end
+
       # Creates a new Driver object using the provided configuration data
       # which will be merged with any default configuration.
       #
@@ -88,8 +92,6 @@ module Kitchen
         super(state)
       end
 
-      # (see Base#setup)
-
       def destroy(state)
         return if state[:app_id].nil?
 
@@ -103,6 +105,9 @@ module Kitchen
       end
 
       def setup(state)
+        # Update the app state
+        update_app_state(state)
+
         super(state)
       end
 
@@ -137,6 +142,7 @@ module Kitchen
 
           raise(::Timeout::Error.new, 'App is not running.') if ::Marathon::App.get(config['id']).info[:tasksRunning] == 0
 
+
           info("Application #{config['id']} is running.")
         end
 
@@ -144,7 +150,8 @@ module Kitchen
       end
 
       def create_app_id
-        "#{config[:app_prefix]}/#{File.basename(config[:kitchen_root])}-#{SecureRandom.hex}"
+        # Need to remove any underscores from the app name
+        "#{config[:app_prefix]}/#{config[:instance_name]}-#{SecureRandom.hex}".tr('_', '-')
       end
 
       def generate_app_config

@@ -19,6 +19,7 @@
 require 'json'
 require 'kitchen'
 require 'marathon'
+require 'net/ssh'
 require 'retryable'
 
 module Kitchen
@@ -30,15 +31,21 @@ module Kitchen
     # @author Anthony Spring <tony@porkchopsandpaintchips.com>
     class Marathon < Kitchen::Driver::SSHBase
 
-      default_config :app_prefix, 'kitchen'
-      default_config :app_template
+      #kitchen_driver_api_version 2
+
+      #plugin_version Kitchen::Driver::MARATHON_VERSION
+
+      default_config  :app_prefix, 'kitchen'
+      default_config  :app_template
       expand_path_for :app_template
+
+      default_config :wait_for_sshd, true
 
       # Marathon HTTP Configuration
 
-      default_config :host, 'http://localhost:8080'
-      default_config :password
-      default_config :username
+      default_config :marathon_host, 'http://localhost:8080'
+      default_config :marathon_password
+      default_config :marathon_username
       default_config :verify_ssl, false
 
       # Marathon Proxy Configuration
@@ -48,7 +55,11 @@ module Kitchen
       default_config :http_proxyuser
       default_config :http_proxypass
 
-      # 
+      # SSH Configuration
+
+      default_config :ssh_username,     'kitchen'
+      default_config :ssh_private_key,  File.join(Dir.pwd, '.kitchen', 'kitchen.pem')
+      expand_path_for :ssh_private_key
 
       # Creates a new Driver object using the provided configuration data
       # which will be merged with any default configuration.
@@ -65,13 +76,32 @@ module Kitchen
       def create(state)
         return if state[:app_id]
 
+        # Update username/password        
+        state[:username]  = config[:ssh_username]
+        state[:ssh_key]   = config[:ssh_private_key]
+
         # Generate the application configuration
         app_config = generate_app_config
 
         # Create the app
         state[:app_id] = create_app(app_config)
+
+        # Update state
+        update_app_state(state)
+
+        # Wait for SSHD to be available
+        #wait_for_sshd(state[:hostname], nil, :port => state[:port]) if config[:wait_for_sshd]
       end
 
+      def converge(state) # rubocop:disable Metrics/AbcSize
+        # Update the app state
+        update_app_state(state)
+
+        super(state)
+      end
+
+      # (see Base#setup)
+      
       def destroy(state)
         return if state[:app_id].nil?
 
@@ -81,6 +111,17 @@ module Kitchen
         end 
 
         state.delete(:app_id)
+      end
+
+      def setup(state)
+        super(state)
+      end
+
+      def verify(state)
+        # Update the app state
+        update_app_state(state)
+
+        super(state)
       end
 
       protected
@@ -96,7 +137,7 @@ module Kitchen
 
           info("Creating the application: #{config['id']}")
 
-          app = ::Marathon::App.create(config)
+          ::Marathon::App.create(config)
         end
 
         # Wait for the deployment to finish
@@ -136,13 +177,21 @@ module Kitchen
         user_config.merge(base_config)
       end
 
+      def get_application_host(id)
+        puts ::Marathon::App.get(id)
+      end
+
+      def get_application_port(id)
+        puts ::Marathon::App.get(id)
+      end
+
       def initialize_marathon
         # Initialize Marathon based off of configuration data
         marathon = {}
 
         # Basic HTTP Information
-        marathon[:username] = config[:username]
-        marathon[:password] = config[:password]
+        marathon[:username] = config[:marathon_username]
+        marathon[:password] = config[:marathon_password]
 
         # Basic SSL information
         marathon[:verify]   = config[:verify_ssl]
@@ -157,7 +206,36 @@ module Kitchen
         ::Marathon.options = marathon 
 
         # Set the Marathon URL
-        ::Marathon.url = config[:host]
+        ::Marathon.url = config[:marathon_host]
+      end
+
+      def update_app_state(state)
+        puts "Refreshing host and port from Marathon..."
+
+        app = nil
+
+        # Get the host and port to SSH on
+        Retryable.retryable(
+          :tries => 10,
+          :sleep => lambda { |n| [2**n, 30].min },
+          :on => [::Marathon::Error::TimeoutError]
+        ) do |r, _|
+
+          # Get the app
+          app = ::Marathon::App.get(state[:app_id])
+        end
+
+        # Get the host
+        state[:hostname] = app.info[:tasks][0][:host]
+
+        # Get the mappings
+        mappings = app.info[:container][:docker][:portMappings]
+
+        # Get the SSH port index
+        ssh_index = mappings.find_index(mappings.find { |mapping| mapping[:labels][:SERVICE] == 'ssh' })
+
+        # Get the port
+        state[:port] = app.info[:tasks][0][:ports][ssh_index]
       end
     end
   end

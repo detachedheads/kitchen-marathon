@@ -1,0 +1,17 @@
+Style/Lambda:
+  Enabled: false
+
+Style/Next:
+  Enabled: false
+
+Style/DoubleNegation:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Max: 30
+
+Metrics/PerceivedComplexity:
+  Max: 30
+
+Metrics/AbcSize:
+  Max: 60

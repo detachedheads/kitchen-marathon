@@ -23,21 +23,14 @@ require 'net/ssh'
 require 'retryable'
 
 module Kitchen
-
   module Driver
-
     # Marathon driver for Kitchen.
     #
     # @author Anthony Spring <aspring@yieldbot.com>
-    class Marathon < Kitchen::Driver::SSHBase
-
+    class Marathon < Kitchen::Driver::SSHBase # rubocop:disable Metrics/ClassLength
       default_config  :app_prefix, 'kitchen'
       default_config  :app_template
       expand_path_for :app_template
-
-      # Expose some basic app configuration to easy configuration
-      default_config  :app_mem
-      default_config  :app_cpu
 
       # Marathon HTTP Configuration
 
@@ -74,7 +67,7 @@ module Kitchen
       def create(state)
         return if state[:app_id]
 
-        # Update username/password        
+        # Update username/password
         state[:username]  = config[:ssh_username]
         state[:ssh_key]   = config[:ssh_private_key]
 
@@ -88,7 +81,7 @@ module Kitchen
         update_app_state(state)
       end
 
-      def converge(state) # rubocop:disable Metrics/AbcSize
+      def converge(state)
         # Update the app state
         update_app_state(state)
 
@@ -96,14 +89,15 @@ module Kitchen
       end
 
       # (see Base#setup)
-      
+
       def destroy(state)
         return if state[:app_id].nil?
 
         begin
           ::Marathon::App.delete(state[:app_id])
-        rescue ::Marathon::Error::NotFoundError => e
-        end 
+        rescue ::Marathon::Error::NotFoundError
+          puts "App (#{state[:app_id]}) not found."
+        end
 
         state.delete(:app_id)
       end
@@ -121,15 +115,13 @@ module Kitchen
 
       protected
 
-      def create_app(config)
-
+      def create_app(config) # rubocop:disable Metrics/MethodLength, Metrics/LineLength
         # Create the application
         Retryable.retryable(
-          :tries => 10,
-          :sleep => lambda { |n| [2**n, 30].min },
-          :on => [::Marathon::Error::TimeoutError]
-        ) do |r, _|
-
+          tries: 10,
+          sleep: ->(n) { [2**n, 30].min },
+          on: [::Marathon::Error::TimeoutError]
+        ) do |_r, _|
           info("Creating the application: #{config['id']}")
 
           ::Marathon::App.create(config)
@@ -137,14 +129,13 @@ module Kitchen
 
         # Wait for the deployment to finish
         Retryable.retryable(
-          :tries => 10,
-          :sleep => lambda { |n| [2**n, 30].min },
-          :on => [::Marathon::Error::TimeoutError, ::Timeout::Error]
-        ) do |r, _|
-
+          tries: 10,
+          sleep: ->(n) { [2**n, 30].min },
+          on: [::Marathon::Error::TimeoutError, ::Timeout::Error]
+        ) do |_r, _|
           info("Waiting for application to deploy: #{config['id']}")
 
-          raise ::Timeout::Error.new() if ::Marathon::App.get(config['id']).info[:tasksRunning] == 0
+          raise(::Timeout::Error.new, 'App is not running.') if ::Marathon::App.get(config['id']).info[:tasksRunning] == 0
 
           info("Application #{config['id']} is running.")
         end
@@ -164,11 +155,11 @@ module Kitchen
 
         # Bring in the user defined JSON template
         user_config = if File.file?(config[:app_template])
-          JSON.parse(IO.read(config[:app_template]))
-        else
-          {}
-        end
-        
+                        JSON.parse(IO.read(config[:app_template]))
+                      else
+                        {}
+                      end
+
         user_config.merge(base_config)
       end
 
@@ -198,24 +189,23 @@ module Kitchen
         marathon[:http_proxypass] = config[:http_proxypass]
 
         # Set the Marathon credentials if given
-        ::Marathon.options = marathon 
+        ::Marathon.options = marathon
 
         # Set the Marathon URL
         ::Marathon.url = config[:marathon_host]
       end
 
-      def update_app_state(state)
-        puts "Refreshing host and port from Marathon..."
+      def update_app_state(state) # rubocop:disable Metrics/MethodLength, Metrics/LineLength
+        puts 'Refreshing host and port from Marathon...'
 
         app = nil
 
         # Get the host and port to SSH on
         Retryable.retryable(
-          :tries => 10,
-          :sleep => lambda { |n| [2**n, 30].min },
-          :on => [::Marathon::Error::TimeoutError]
-        ) do |r, _|
-
+          tries: 10,
+          sleep: ->(n) { [2**n, 30].min },
+          on: [::Marathon::Error::TimeoutError]
+        ) do |_r, _|
           # Get the app
           app = ::Marathon::App.get(state[:app_id])
         end
@@ -235,4 +225,3 @@ module Kitchen
     end
   end
 end
-

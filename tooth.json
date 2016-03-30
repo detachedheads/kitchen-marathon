@@ -3,5 +3,9 @@
     "org": "com.yieldbot.infra",
     "name": "kitchen-marathon",
     "type": "gem"
-  }
+  },
+  "commit" : [
+    "lib/kitchen/driver/marathon_version.rb",
+    "Gemfile.lock"
+  ]
 }

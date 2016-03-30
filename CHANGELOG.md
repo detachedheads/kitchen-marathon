@@ -9,4 +9,5 @@ Nothing at this time.
 ## Added
 - Initial internal release
 
-[Unreleased]: https://github.com/yieldbot/kitchen-marathon/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/yieldbot/kitchen-marathon/compare/kitchen-marathon-0.0.1...HEAD
+[0.0.2]: https://github.com/yieldbot/kitchen-master/compare/kitchen-marathon-0.0.1...kitchen-marathon-0.0.2

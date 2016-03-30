@@ -169,16 +169,8 @@ module Kitchen
                         {}
                       end
 
-        # user config -> app config -> basec config
+        # user config -> app config -> basecconfig
         user_config.merge(config[:app_config]).merge(base_config)
-      end
-
-      def get_application_host(id)
-        puts ::Marathon::App.get(id)
-      end
-
-      def get_application_port(id)
-        puts ::Marathon::App.get(id)
       end
 
       def initialize_marathon

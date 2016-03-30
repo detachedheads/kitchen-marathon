@@ -32,6 +32,8 @@ module Kitchen
       default_config  :app_template
       expand_path_for :app_template
 
+      default_config :app_config, {}
+
       # Marathon HTTP Configuration
 
       default_config :marathon_host, 'http://localhost:8080'
@@ -167,7 +169,8 @@ module Kitchen
                         {}
                       end
 
-        user_config.merge(base_config)
+        # user config -> app config -> basec config
+        user_config.merge(config[:app_config]).merge(base_config)
       end
 
       def get_application_host(id)

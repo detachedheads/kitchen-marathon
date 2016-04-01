@@ -1,38 +1,99 @@
-# Kitchen::Marathon
+# <a name="title"></a> Kitchen::Marathon
 
 A Test Kitchen Driver for Mesos Marathon.
 
 This driver uses the [Marathon REST API][marathon_api] to create and destroy Marathon applications, allowing you to leverage your Mesos infrastructure for infrastructure testing!
 
-## Requirements
+This plugin takes an opinionated approach to running applications within Marathon:
+* It assumes you are running in a docker container
+* You can SSH into that container
+* You can provide the appropriate username and private key to do so.
 
-**TODO:** document any software or library prerequisites that are required to
-use this driver. Implement the `#verify_dependencies` method in your Driver
-class to enforce these requirements in code, if possible.
+## <a name="requirements"></a> Requirements
+
+There are **no** external system requirements for this driver.  You will need to know the hostname of a Mesos Marathon cluster and the credentials, if necessary, to access its REST api.
 
 ## Installation and Setup
 
 Please read the [Driver usage][driver_usage] page for more details.
 
-## Configuration
+## <a name="config"></a> Configuration
 
-**TODO:** Write descriptions of all configuration options
+### <a name="config-app-prefix"></a> app\_prefix
 
-### require\_chef\_omnibus
+This is the prefix applied to Marathon App names.
 
-Determines whether or not a Chef [Omnibus package][chef_omnibus_dl] will be
-installed. There are several different behaviors available:
+The default value is `kitchen/`.
 
-* `true` - the latest release will be installed. Subsequent converges
-  will skip re-installing if chef is present.
-* `latest` - the latest release will be installed. Subsequent converges
-  will always re-install even if chef is present.
-* `<VERSION_STRING>` (ex: `10.24.0`) - the desired version string will
-  be passed the the install.sh script. Subsequent converges will skip if
-  the installed version and the desired version match.
-* `false` or `nil` - no chef is installed.
+### <a name="config-app-template"></a> app\_template
 
-The default value is unset, or `nil`.
+This allows for a Marathon Job template that will be used as the base template when the job template is created.  If this value is not provided all configuration parameters need to be set via `app_config`.
+
+The default value is `nil`.
+
+### <a name="config-app-config"></a> app\_config
+
+This allows for Marathon Job configuration to be configured at the platform/suite/etc level as necessary.
+
+This configuration is merged on top of any configuration provided by `app_template`.
+
+The default value is `{}`.
+
+### <a name="config-app-launch-timeout"></a> app\_launch\_timeout
+
+Determines the timeout, in seconds, that the driver will wait for a Marathon App to deploy.  If the timeout is reached, the driver will assume that the deployment will not succeed and will attempt to stop the deployment and delete the Marathon App.  (This cleanup is best effort.)
+
+The default value is `30` seconds.
+
+### <a name="config-marathon-host"></a> marathon\_host
+
+The web address to the Marathon host.
+
+The default value is `http://localhost:8080`.
+
+### <a name="config-marathon-password"></a> marathon\_password
+
+The password to use for an HTTP AUTH protected Marathon Host
+
+The default value is `nil`.
+
+### <a name="config-marathon-username"></a> marathon\_username
+
+The username to use for an HTTP AUTH protected Marathon Host
+
+The default value is `nil`.
+
+### <a name="config-marathon-verify-ssl"></a> marathon\_verify\_ssl
+
+Whether or not a certificate presented by the Marathon Host is verified.
+
+The default value is `true`.
+
+## Marathon Proxy Configuration
+
+### <a name="config-marathon-proxy-address"></a> marathon\_proxy\_address
+
+Provides the option to specify a proxy address if necessary when connecting to the Marathon host.
+
+The default value is `nil`.
+
+### <a name="config-marathon-proxy-password"></a> marathon\_proxy\_password
+
+Provides the option to specify a proxy passowrd if necessary when connecting to the Marathon host.
+
+The default value is `nil`.
+
+### <a name="config-marathon-proxy-port"></a> marathon\_proxy\_port
+
+Provides the option to specify a proxy port if necessary when connecting to the Marathon host.
+
+The default value is `nil`.
+
+### <a name="config-marathon-proxy-username"></a> marathon\_proxy\_username
+
+Provides the option to specify a proxy username if necessary when connecting to the Marathon host.
+
+The default value is `nil`.
 
 ## Development
 

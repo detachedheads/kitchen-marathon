@@ -118,32 +118,32 @@ module Kitchen
 
       protected
 
-      def create_app(config) # rubocop:disable Metrics/MethodLength, Metrics/LineLength
+      def create_app(app_config) # rubocop:disable Metrics/MethodLength, Metrics/LineLength
         # Create the application
         Retryable.retryable(
           tries: 10,
           sleep: ->(n) { [2**n, 30].min },
           on: [::Marathon::Error::TimeoutError]
         ) do |_r, _|
-          info("Creating the application: #{config['id']}")
+          info("Creating the application: #{app_config['id']}")
 
-          ::Marathon::App.create(config)
+          ::Marathon::App.create(app_config)
         end
 
         # Wait for the deployment to finish
         Retryable.retryable(
           tries: 10,
-          sleep: ->(n) { [2**n, 30].min },
+          sleep: ->(n) { [2**n, config[:app_launch_timeout]].min },
           on: [::Marathon::Error::TimeoutError, ::Timeout::Error]
         ) do |_r, _|
-          info("Waiting for application to deploy: #{config['id']}")
+          info("Waiting for application to deploy: #{app_config['id']}")
 
-          raise(::Timeout::Error.new, 'App is not running.') if ::Marathon::App.get(config['id']).info[:tasksRunning] == 0
+          raise(::Timeout::Error.new, 'App is not running.') if ::Marathon::App.get(app_config['id']).info[:tasksRunning] == 0
 
-          info("Application #{config['id']} is running.")
+          info("Application #{app_config['id']} is running.")
         end
 
-        config['id']
+        app_config['id']
       end
 
       def create_app_id

@@ -29,7 +29,6 @@ module Kitchen
     #
     # @author Anthony Spring <aspring@yieldbot.com>
     class Marathon < Kitchen::Driver::SSHBase # rubocop:disable Metrics/ClassLength
-
       # Marathon Application Configuration
 
       default_config  :app_prefix,                'kitchen/'
@@ -51,9 +50,9 @@ module Kitchen
 
       default_config :marathon_proxy_address,     nil
       default_config :marathon_proxy_port,        nil
-      default_config :marathon_proxy_password,    nil 
-      default_config :marathon_proxy_username,    nil 
-      
+      default_config :marathon_proxy_password,    nil
+      default_config :marathon_proxy_username,    nil
+
       default_config(:instance_name) do |driver|
         driver.windows_os? ? nil : driver.instance.name
       end
@@ -132,20 +131,18 @@ module Kitchen
         app_config['id']
       end
 
-      def create_app_id
+      def create_app_id # rubocop:disable Metrics/LineLength
         # Need to remove any underscores from the app name
         "#{config[:app_prefix]}#{config[:instance_name]}-#{SecureRandom.hex}".tr('_', '-')
       end
 
       def destroy_app(app_id)
-        begin
-          ::Marathon::App.delete(state[:app_id])
-        rescue ::Marathon::Error::NotFoundError
-          puts "App (#{state[:app_id]}) not found."
-        end
+        ::Marathon::App.delete(app_id)
+      rescue ::Marathon::Error::NotFoundError
+        puts "App (#{app_id}) not found."
       end
 
-      def generate_app_config
+      def generate_app_config # rubocop:disable Metrics/MethodLength
         # Generate the necessary config
         necessary_config = {}
         necessary_config['id']         = create_app_id
@@ -236,7 +233,6 @@ module Kitchen
           info("Application #{app_config['id']} is running.")
         end
       end
-
     end
   end
 end

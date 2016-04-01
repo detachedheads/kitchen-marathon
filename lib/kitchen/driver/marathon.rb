@@ -79,6 +79,9 @@ module Kitchen
         # Create the app
         state[:app_id] = create_app(app_config)
 
+        # Wait for the apps deployment to finish
+        wait_for_app_deployment(app_config)
+
         # Update state
         update_app_state(state)
       end
@@ -93,11 +96,7 @@ module Kitchen
       def destroy(state)
         return if state[:app_id].nil?
 
-        begin
-          ::Marathon::App.delete(state[:app_id])
-        rescue ::Marathon::Error::NotFoundError
-          puts "App (#{state[:app_id]}) not found."
-        end
+        destroy_app(state[:app_id])
 
         state.delete(:app_id)
       end
@@ -118,8 +117,7 @@ module Kitchen
 
       protected
 
-      def create_app(app_config) # rubocop:disable Metrics/MethodLength, Metrics/LineLength
-        # Create the application
+      def create_app(app_config)
         Retryable.retryable(
           tries: 10,
           sleep: ->(n) { [2**n, 30].min },
@@ -127,20 +125,8 @@ module Kitchen
         ) do |_r, _|
           info("Creating the application: #{app_config['id']}")
 
+          # Create the application
           ::Marathon::App.create(app_config)
-        end
-
-        # Wait for the deployment to finish
-        Retryable.retryable(
-          tries: 10,
-          sleep: ->(n) { [2**n, config[:app_launch_timeout]].min },
-          on: [::Marathon::Error::TimeoutError, ::Timeout::Error]
-        ) do |_r, _|
-          info("Waiting for application to deploy: #{app_config['id']}")
-
-          raise(::Timeout::Error.new, 'App is not running.') if ::Marathon::App.get(app_config['id']).info[:tasksRunning] == 0
-
-          info("Application #{app_config['id']} is running.")
         end
 
         app_config['id']
@@ -149,6 +135,14 @@ module Kitchen
       def create_app_id
         # Need to remove any underscores from the app name
         "#{config[:app_prefix]}#{config[:instance_name]}-#{SecureRandom.hex}".tr('_', '-')
+      end
+
+      def destroy_app(app_id)
+        begin
+          ::Marathon::App.delete(state[:app_id])
+        rescue ::Marathon::Error::NotFoundError
+          puts "App (#{state[:app_id]}) not found."
+        end
       end
 
       def generate_app_config
@@ -228,6 +222,21 @@ module Kitchen
         # Get the port
         state[:port] = app.info[:tasks][0][:ports][ssh_index]
       end
+
+      def wait_for_app_deployment(app_config) # rubocop:disable Metrics/LineLength
+        Retryable.retryable(
+          tries: 10,
+          sleep: ->(n) { [2**n, config[:app_launch_timeout]].min },
+          on: [::Marathon::Error::TimeoutError, ::Timeout::Error]
+        ) do |_r, _|
+          info("Waiting for application to deploy: #{app_config['id']}")
+
+          raise(::Timeout::Error.new, 'App is not running.') if ::Marathon::App.get(app_config['id']).info[:tasksRunning] == 0
+
+          info("Application #{app_config['id']} is running.")
+        end
+      end
+
     end
   end
 end

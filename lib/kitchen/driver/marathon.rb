@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'deep_merge'
 require 'json'
 require 'kitchen'
 require 'marathon'
@@ -28,32 +29,31 @@ module Kitchen
     #
     # @author Anthony Spring <aspring@yieldbot.com>
     class Marathon < Kitchen::Driver::SSHBase # rubocop:disable Metrics/ClassLength
-      default_config  :app_prefix, 'kitchen'
-      default_config  :app_template
+
+      # Marathon Application Configuration
+
+      default_config  :app_prefix,                'kitchen/'
+      default_config  :app_template,              nil
       expand_path_for :app_template
 
-      default_config :app_config, {}
+      default_config  :app_config,                {}
+
+      default_config  :app_launch_timeout,        30
 
       # Marathon HTTP Configuration
 
-      default_config :marathon_host, 'http://localhost:8080'
-      default_config :marathon_password
-      default_config :marathon_username
-      default_config :verify_ssl, false
+      default_config :marathon_host,              'http://localhost:8080'
+      default_config :marathon_password,          nil
+      default_config :marathon_username,          nil
+      default_config :marathon_verify_ssl,        true
 
       # Marathon Proxy Configuration
 
-      default_config :http_proxyaddr
-      default_config :http_proxyport
-      default_config :http_proxyuser
-      default_config :http_proxypass
-
-      # SSH Configuration
-
-      default_config  :ssh_username,     'kitchen'
-      default_config  :ssh_private_key,  File.join(Dir.pwd, '.kitchen', 'kitchen.pem')
-      expand_path_for :ssh_private_key
-
+      default_config :marathon_proxy_address,     nil
+      default_config :marathon_proxy_port,        nil
+      default_config :marathon_proxy_password,    nil 
+      default_config :marathon_proxy_username,    nil 
+      
       default_config(:instance_name) do |driver|
         driver.windows_os? ? nil : driver.instance.name
       end
@@ -72,10 +72,6 @@ module Kitchen
 
       def create(state)
         return if state[:app_id]
-
-        # Update username/password
-        state[:username]  = config[:ssh_username]
-        state[:ssh_key]   = config[:ssh_private_key]
 
         # Generate the application configuration
         app_config = generate_app_config
@@ -144,7 +140,6 @@ module Kitchen
 
           raise(::Timeout::Error.new, 'App is not running.') if ::Marathon::App.get(config['id']).info[:tasksRunning] == 0
 
-
           info("Application #{config['id']} is running.")
         end
 
@@ -153,14 +148,14 @@ module Kitchen
 
       def create_app_id
         # Need to remove any underscores from the app name
-        "#{config[:app_prefix]}/#{config[:instance_name]}-#{SecureRandom.hex}".tr('_', '-')
+        "#{config[:app_prefix]}#{config[:instance_name]}-#{SecureRandom.hex}".tr('_', '-')
       end
 
       def generate_app_config
-        # Generate the necessary app config
-        base_config = {}
-        base_config['id']         = create_app_id
-        base_config['instances']  = 1
+        # Generate the necessary config
+        necessary_config = {}
+        necessary_config['id']         = create_app_id
+        necessary_config['instances']  = 1
 
         # Bring in the user defined JSON template
         user_config = if File.file?(config[:app_template])
@@ -169,8 +164,17 @@ module Kitchen
                         {}
                       end
 
-        # user config -> app config -> basecconfig
-        user_config.merge(config[:app_config]).merge(base_config)
+        # Convert the app config into non-symbolized names
+        app_config = JSON.parse(config[:app_config].to_json, symbolize_names: false)
+
+        # Overlay the app config
+        user_config.deep_merge!(app_config)
+
+        # Overlay the necessary config
+        user_config.deep_merge!(necessary_config)
+
+        # Return the derived configuration
+        user_config
       end
 
       def initialize_marathon
@@ -178,17 +182,17 @@ module Kitchen
         marathon = {}
 
         # Basic HTTP Information
-        marathon[:username] = config[:marathon_username]
-        marathon[:password] = config[:marathon_password]
+        marathon[:username]       = config[:marathon_username]
+        marathon[:password]       = config[:marathon_password]
 
         # Basic SSL information
-        marathon[:verify]   = config[:verify_ssl]
+        marathon[:verify]         = config[:marathon_verify_ssl]
 
         # Basic Proxy information
-        marathon[:http_proxyaddr] = config[:http_proxyaddr]
-        marathon[:http_proxyport] = config[:http_proxyport]
-        marathon[:http_proxyuser] = config[:http_proxyuser]
-        marathon[:http_proxypass] = config[:http_proxypass]
+        marathon[:http_proxyaddr] = config[:marathon_proxy_address]
+        marathon[:http_proxyport] = config[:marathon_proxy_port]
+        marathon[:http_proxyuser] = config[:marathon_proxy_username]
+        marathon[:http_proxypass] = config[:marathon_proxy_password]
 
         # Set the Marathon credentials if given
         ::Marathon.options = marathon

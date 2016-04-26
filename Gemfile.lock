@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    kitchen-marathon (0.0.3)
+    kitchen-marathon (0.0.4)
       deep_merge (= 1.0.1)
       marathon-api (~> 1.3.2)
       retryable (>= 1.3.3)

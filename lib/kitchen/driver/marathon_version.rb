@@ -24,7 +24,7 @@ module Kitchen
     module Version
       MAJOR = 0
       MINOR = 0
-      PATCH = 3
+      PATCH = 4
       BUILD = ''.freeze
 
       STRING = [MAJOR, MINOR, PATCH, BUILD].compact.join('.').chomp('.')

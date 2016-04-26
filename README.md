@@ -12,7 +12,7 @@ This plugin takes an opinionated approach to running applications within Maratho
 
 To use this driver you will need access to a Mesos Marathon cluster.  You will need to know the hostname and access credentials for this cluster for the plugin to access its REST api.
 
-This driver requires a slightly opinionated approach to Marathon Application configuration to assist in identifying what host port to use to acccess SSH running inside of a container.  To achieve this the plugin looks at the docker port mappings for a label with the key of "SERVICE" and value of "ssh".
+This driver requires a slightly opinionated approach to Marathon Application configuration to assist in identifying what host port to use to acccess SSH running inside of a container.  If there is a single port mapping defined, the plugin will assume that this is where SSH is listening, if there is more than one port mapping defined, the plugin looks for a mapping label with the key of "SERVICE" and a value of "SSH".
 
 The following is a slice of json showing the label:
 

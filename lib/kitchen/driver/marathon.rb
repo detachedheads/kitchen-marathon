@@ -139,7 +139,7 @@ module Kitchen
       def destroy_app(app_id)
         ::Marathon::App.delete(app_id)
       rescue ::Marathon::Error::NotFoundError
-        puts "App (#{app_id}) not found."
+        info("App (#{app_id}) not found.")
       end
 
       def generate_app_config # rubocop:disable Metrics/MethodLength
@@ -193,7 +193,7 @@ module Kitchen
       end
 
       def update_app_state(state) # rubocop:disable Metrics/MethodLength, Metrics/LineLength
-        puts 'Refreshing host and port from Marathon...'
+        info('Refreshing host and port from Marathon...')
 
         app = nil
 
@@ -213,11 +213,23 @@ module Kitchen
         # Get the mappings
         mappings = app.info[:container][:docker][:portMappings]
 
-        # Get the SSH port index
-        ssh_index = mappings.find_index(mappings.find { |mapping| mapping[:labels][:SERVICE] == 'ssh' })
+        # Get the index
+        ssh_index = case mappings.length
+        when 1
+          info("Single port mapping found! Defaulting to that port.")
 
-        # Get the port
-        state[:port] = app.info[:tasks][0][:ports][ssh_index]
+          # If there is a single mapping assume it is the SSH service port
+          0
+        else
+          info("Multiple port mappings found! Looking for label 'SERVICE' => 'ssh'...")
+
+          # Attempt to find the index via labels
+          mappings.find_index(mappings.find { |mapping| mapping[:labels][:SERVICE] == 'ssh' })
+        end
+
+        info("Unable to determine SSH port index from mappings!") if ssh_index.nil?
+
+        state[:port] = ssh_index.nil? ? 0 : app.info[:tasks][0][:ports][ssh_index]
       end
 
       def wait_for_app_deployment(app_config) # rubocop:disable Metrics/LineLength

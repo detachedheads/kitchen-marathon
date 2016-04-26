@@ -6,12 +6,39 @@ This driver uses the [Marathon REST API][marathon_api] to create and destroy Mar
 
 This plugin takes an opinionated approach to running applications within Marathon:
 * It assumes you are running in a docker container
-* You can SSH into that container
-* You can provide the appropriate username and private key to do so.
+* You can SSH into that container with a username and private key.
 
 ## <a name="requirements"></a> Requirements
 
-There are **no** external system requirements for this driver.  You will need to know the hostname of a Mesos Marathon cluster and the credentials, if necessary, to access its REST api.
+To use this driver you will need access to a Mesos Marathon cluster.  You will need to know the hostname and access credentials for this cluster for the plugin to access its REST api.
+
+This driver requires a slightly opinionated approach to Marathon Application configuration to assist in identifying what host port to use to acccess SSH running inside of a container.  To achieve this the plugin looks at the docker port mappings for a label with the key of "SERVICE" and value of "ssh".
+
+The following is a slice of json showing the label:
+
+```json
+{
+  "container": {
+    "docker": {
+      "forcePullImage": true,
+      "image": "docker.yb0t.cc/centos-7-kitchen:1.0.0",
+      "network": "BRIDGE",
+      "portMappings": [
+        {
+          "containerPort": 22,
+          "hostPort": 0,
+          "labels": {
+            "SERVICE" : "ssh"
+          },
+          "protocol": "tcp"
+        },
+      ],
+    },
+    "type": "DOCKER",
+  }
+}
+
+```
 
 ## Installation and Setup
 

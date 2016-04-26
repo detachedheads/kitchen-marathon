@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 - Nothing at this time.
 
+## [0.0.3]
+### Changes
+- Make the assumption that if a single port mapping is available that it is the SSH port.
+
 ## [0.0.2]
 ### Changes
 - Remove unnecessary ssh configuration params -- this is handled by the transport.
@@ -17,5 +21,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Initial internal release
 
-[Unreleased]: https://github.com/yieldbot/kitchen-marathon/compare/kitchen-marathon-0.0.2...HEAD
+[Unreleased]: https://github.com/yieldbot/kitchen-marathon/compare/kitchen-marathon-0.0.3...HEAD
+[0.0.3]: https://github.com/yieldbot/kitchen-master/compare/kitchen-marathon-0.0.2...kitchen-marathon-0.0.3
 [0.0.2]: https://github.com/yieldbot/kitchen-master/compare/kitchen-marathon-0.0.1...kitchen-marathon-0.0.2

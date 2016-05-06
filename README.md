@@ -2,7 +2,7 @@
 
 A Test Kitchen Driver for Mesos Marathon.
 
-This driver uses the [Marathon REST API][marathon_api] to create and destroy Marathon applications, allowing you to leverage the resources of a Mesos cluster to perform distributed testing.
+This driver uses the [Marathon REST API][marathon_api] to create and destroy Marathon applications which act as Kitchen suites, allowing you to leverage the resources of a Mesos cluster to help reduce testing time.
 
 ## <a name="requirements"></a> Requirements
 
@@ -51,7 +51,30 @@ The following is a slice of json showing the label:
 
 ## Installation and Setup
 
-Please read the [Driver usage][driver_usage] page for more details.
+Please read the Test Kitchen [docs][test_kitchen_docs] for more details.
+
+Example `.kitchen.local.yml`:
+
+```yaml
+---
+driver:
+  name: marathon
+
+driver_config:
+  app_launch_timeout: 30
+  app_template: '.kitchen-marathon.json'
+  marathon_host: 'http://core-apps.mesos-marathon.service.consul:8080'
+
+platforms:
+- name: centos-7
+  driver_config:
+    app_config:
+      container:
+        docker:
+          image: jdeathe/centos-ssh:centos-7
+  run_list:
+  - recipe[yum]
+```
 
 ## <a name="config"></a> Configuration
 
@@ -154,12 +177,12 @@ Created and maintained by [Anthony Spring][author] (<aspring@yieldbot.com>)
 
 Apache 2.0 (see [LICENSE][license])
 
-[author]:           https://github.com/yieldbot
-[driver_usage]:     https://github.com/yieldbot/kitchen-marathon
-[issues]:           https://github.com/yieldbot/kitchen-marathon/issues
-[license]:          https://github.com/yieldbot/kitchen-marathon/blob/master/LICENSE
-[marathon]:         https://mesosphere.github.io/marathon/
-[marathon_api]:     https://github.com/otto-de/marathon-api
-[marathon_docker]:  https://mesosphere.github.io/marathon/docs/native-docker.html
-[repo]:             https://github.com/yieldbot/kitchen-marathon
+[author]:             https://github.com/yieldbot
+[issues]:             https://github.com/yieldbot/kitchen-marathon/issues
+[license]:            https://github.com/yieldbot/kitchen-marathon/blob/master/LICENSE
+[marathon]:           https://mesosphere.github.io/marathon/
+[marathon_api]:       https://github.com/otto-de/marathon-api
+[marathon_docker]:    https://mesosphere.github.io/marathon/docs/native-docker.html
+[repo]:               https://github.com/yieldbot/kitchen-marathon
+[test_kitchen_docs]:  http://kitchen.ci/docs/getting-started/
 

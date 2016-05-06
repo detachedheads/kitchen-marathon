@@ -2,17 +2,26 @@
 
 A Test Kitchen Driver for Mesos Marathon.
 
-This driver uses the [Marathon REST API][marathon_api] to create and destroy Marathon applications, allowing you to leverage your Mesos infrastructure for infrastructure testing!
-
-This plugin takes an opinionated approach to running applications within Marathon:
-* It assumes you are running in a docker container
-* You can SSH into that container with a username and private key.
+This driver uses the [Marathon REST API][marathon_api] to create and destroy Marathon applications, allowing you to leverage the resources of a Mesos cluster to perform distributed testing.
 
 ## <a name="requirements"></a> Requirements
 
-To use this driver you will need access to a Mesos Marathon cluster.  You will need to know the hostname and access credentials for this cluster for the plugin to access its REST api.
+### Mesos/Marathon
 
-This driver requires a slightly opinionated approach to Marathon Application configuration to assist in identifying what host port to use to acccess SSH running inside of a container.  If there is a single port mapping defined, the plugin will assume that this is where SSH is listening, if there is more than one port mapping defined, the plugin looks for a mapping label with the key of "SERVICE" and a value of "SSH".
+To use this driver you will need access to a Mesos Marathon cluster.  You will need to know the hostname and access credentials for this cluster for the plugin to access its REST API.
+
+This cluster must be configured to run [Docker containers][marathon_docker].
+
+### Marathon Job Configuration
+
+This driver requires the following be true of the Marathon job configuration:
+
+* You are running a Marathon container job of type "DOCKER".
+* You can SSH into the container with a user specified username and private key.
+
+This driver requires a slightly opinionated approach to Marathon Application configuration to assist in identifying what host port to use to acccess SSH running inside of a container.  
+
+If there is a single port mapping defined, the plugin will assume that this is where SSH is listening, if there is more than one port mapping defined, the plugin looks for a mapping label with the key of "SERVICE" and a value of "SSH".
 
 The following is a slice of json showing the label:
 
@@ -21,7 +30,7 @@ The following is a slice of json showing the label:
   "container": {
     "docker": {
       "forcePullImage": true,
-      "image": "docker.yb0t.cc/centos-7-kitchen:1.0.0",
+      "image": "someimagenamehere:latest",
       "network": "BRIDGE",
       "portMappings": [
         {
@@ -151,5 +160,6 @@ Apache 2.0 (see [LICENSE][license])
 [license]:          https://github.com/yieldbot/kitchen-marathon/blob/master/LICENSE
 [marathon]:         https://mesosphere.github.io/marathon/
 [marathon_api]:     https://github.com/otto-de/marathon-api
+[marathon_docker]:  https://mesosphere.github.io/marathon/docs/native-docker.html
 [repo]:             https://github.com/yieldbot/kitchen-marathon
 

@@ -1,5 +1,8 @@
 # <a name="title"></a> Kitchen::Marathon
 
+[![Gem Version](https://badge.fury.io/rb/kitchen-marathon.svg)](http://badge.fury.io/rb/kitchen-marathon)
+[![Build Status](https://travis-ci.org/yieldbot/kitchen-marathon.svg?branch=master)](https://travis-ci.org/yieldbot/kitchen-marathon)
+
 A Test Kitchen Driver for Mesos Marathon.
 
 This driver uses the [Marathon REST API][marathon_api] to create and destroy Marathon applications which act as Kitchen suites, allowing you to leverage the resources of a Mesos cluster to help reduce testing time.

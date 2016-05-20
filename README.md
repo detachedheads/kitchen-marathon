@@ -8,7 +8,7 @@ This driver uses the [Marathon REST API][marathon_api] to create and destroy Mar
 
 ### Mesos/Marathon
 
-To use this driver you will need access to a Mesos Marathon cluster.  You will need to know the hostname and access credentials for this cluster for the plugin to access its REST API.
+To use this driver you will need access to a Mesos Marathon cluster.  You will need to know the hostname and access credentials of the cluster for the plugin to access the REST API.
 
 This cluster must be configured to run [Docker containers][marathon_docker].
 
@@ -59,6 +59,11 @@ Example `.kitchen.local.yml`:
 ---
 driver:
   name: marathon
+
+# Username and key used to access the container
+transport:
+  ssh_key: '~/.ssh/vagrant'
+  username: kitchen
 
 driver_config:
   app_launch_timeout: 30

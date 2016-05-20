@@ -29,7 +29,7 @@ require 'rspec/core'
 require 'rspec/core/rake_task'
 require 'rubocop/rake_task'
 
-desc 'Bump the PATCH version of DrTeeth'
+desc 'Bump the PATCH version for DrTeeth'
 task :bump do
   version_file = 'lib/kitchen/driver/marathon_version.rb'
 
@@ -49,7 +49,7 @@ end
 require 'rubocop/rake_task'
 RuboCop::RakeTask.new(:rubocop) do |t|
   # Specify the files we will look at
-  t.patterns = [File.join('{lib}', '**', '*.rb')]
+  t.patterns = [File.join('{lib}', '**', '*.rb'), 'Rakefile', '*.gemspec']
 
   # Do not fail on error
   t.fail_on_error = false
